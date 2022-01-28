@@ -9,12 +9,15 @@ public class MainViewModel extends ViewModel {
     private final MainBusinessModel mainInterface;
     public final MutableLiveData<Boolean> changeVideo = new MutableLiveData<>();
 
-    public MainViewModel() { this.mainInterface = MainBusinessModel.getInstance(); }
+    public MainViewModel() {
+        this.mainInterface = MainBusinessModel.getInstance();
+        mainInterface.setCodes();
+    }
 
     public MutableLiveData<Boolean> getChangeVideo() { return changeVideo; }
 
-    public void changeVideo(boolean change) {
-        changeVideo.postValue(change);
+    public void changeVideo(String code) {
+        changeVideo.postValue(mainInterface.verifyCode(code));
     }
 
 }

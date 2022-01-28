@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
@@ -31,6 +32,10 @@ public class MainActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         viewModel = getViewModel(MainViewModel.class);
+
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        getSupportActionBar().hide();
 
         bindComponents();
         setupObservables();
@@ -80,7 +85,7 @@ public class MainActivity extends BaseActivity {
     private void setupVideo() {
         edtBarCode.setOnEditorActionListener((textView, actionId, keyEvent) -> {
             if (actionId == EditorInfo.IME_ACTION_UNSPECIFIED) {
-                viewModel.changeVideo(true);
+                viewModel.changeVideo(textView.getText().toString());
                 textView.setText("");
                 keyboardListener();
             }

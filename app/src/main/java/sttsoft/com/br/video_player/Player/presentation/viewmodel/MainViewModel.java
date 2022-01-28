@@ -13,7 +13,7 @@ public class MainViewModel extends ViewModel {
 
     public MutableLiveData<Boolean> getChangeVideo() { return changeVideo; }
 
-    public void setVideo(boolean change) {
+    public void changeVideo(boolean change) {
         changeVideo.postValue(change);
     }
 

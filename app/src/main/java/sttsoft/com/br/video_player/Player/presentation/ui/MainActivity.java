@@ -36,11 +36,12 @@ public class MainActivity extends BaseActivity {
         setupObservables();
         setupVideo(R.raw.loop);
         keyboardListener();
+        setupVideo();
     }
 
     private void bindComponents() {
         edtBarCode = findViewById(R.id.edtBarCode);
-        videoView = (VideoView) findViewById(R.id.videoView);
+        videoView = findViewById(R.id.videoView);
     }
 
     private void setupObservables() {
@@ -58,33 +59,14 @@ public class MainActivity extends BaseActivity {
         if (video == R.raw.loop) {
             videoView.setOnPreparedListener(mediaPlayer -> mediaPlayer.setLooping(true));
         } else {
+            videoView.setOnPreparedListener(mediaPlayer -> mediaPlayer.setLooping(false));
             videoView.setOnCompletionListener(mediaPlayer -> setupVideo(R.raw.loop));
         }
     }
 
     private void keyboardListener() {
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                showSoftKeyboard(edtBarCode);
-            }
-        }, 300);
-
-        edtBarCode.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-            @Override
-            public boolean onEditorAction(TextView textView, int actionId, KeyEvent keyEvent) {
-                boolean handled = false;
-                if (actionId == EditorInfo.IME_ACTION_SEND) {
-                    sendMessage();
-                    handled = true;
-                }
-                return handled;
-            }
-        });
-    }
-
-    private void sendMessage() {
-        Toast.makeText(this, "BATATA", Toast.LENGTH_LONG).show();
+        edtBarCode.setEnabled(true);
+        new Handler().postDelayed(() -> showSoftKeyboard(edtBarCode), 300);
     }
 
     public void showSoftKeyboard(View view) {
@@ -95,5 +77,14 @@ public class MainActivity extends BaseActivity {
         }
     }
 
-
+    private void setupVideo() {
+        edtBarCode.setOnEditorActionListener((textView, actionId, keyEvent) -> {
+            if (actionId == EditorInfo.IME_ACTION_UNSPECIFIED) {
+                viewModel.changeVideo(true);
+                textView.setText("");
+                keyboardListener();
+            }
+            return false;
+        });
+    }
 }

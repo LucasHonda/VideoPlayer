@@ -1,8 +1,12 @@
 package sttsoft.com.br.video_player.Player.business;
 
+import android.util.Log;
+
 import org.reactivestreams.Subscription;
 
 import java.util.ArrayList;
+import java.util.Scanner;
+import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
@@ -10,9 +14,16 @@ import io.reactivex.rxjava3.annotations.NonNull;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.core.Observer;
 import io.reactivex.rxjava3.disposables.Disposable;
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import sttsoft.com.br.video_player.Player.Utils.remote.source.RAccess;
+import sttsoft.com.br.video_player.Player.repository.PlayerRepository;
 
 public class MainBusinessModel {
 
+    private static final String TAG = "MainBusinessModel";
     private static MainBusinessModel instance;
     private ArrayList<String> codes = new ArrayList<>();
 
@@ -58,6 +69,32 @@ public class MainBusinessModel {
 
                     @Override
                     public void onNext(@NonNull Long aLong) {
+                        final PlayerRepository playerRepository = RAccess.createService(PlayerRepository.class);
+
+                        Call<ResponseBody> call = playerRepository.getChangeVideo();
+
+                        call.enqueue(new Callback<ResponseBody>() {
+                            @Override
+                            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+
+                                if(response.isSuccessful()) {
+
+                                    Scanner scanner = new Scanner(response.body().byteStream());
+
+                                    boolean retorno = scanner.nextBoolean();
+
+                                    Log.i(TAG, "onResponse Trace retorno: " + retorno);
+
+                                }
+                            }
+
+                            @Override
+                            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                                Log.i(TAG, "onFailure : " + t.getMessage());
+                            }
+                        });
+
+
 
                     }
 
@@ -69,6 +106,7 @@ public class MainBusinessModel {
                     @Override
                     public void onComplete() {}
                 });
+
 
 
         for (String c: codes) {

@@ -92,4 +92,10 @@ public class MainActivity extends BaseActivity {
             return false;
         });
     }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        getPackageManager().clearPackagePreferredActivities(getPackageName());
+    }
 }

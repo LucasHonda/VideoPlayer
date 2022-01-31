@@ -1,6 +1,15 @@
 package sttsoft.com.br.video_player.Player.business;
 
+import org.reactivestreams.Subscription;
+
 import java.util.ArrayList;
+import java.util.concurrent.TimeUnit;
+
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.annotations.NonNull;
+import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.core.Observer;
+import io.reactivex.rxjava3.disposables.Disposable;
 
 public class MainBusinessModel {
 
@@ -38,7 +47,30 @@ public class MainBusinessModel {
         codes.add("7896045506347");
     }
 
-    public boolean verifyCode(String code) {
+    public boolean verifyCode() {
+        Observable.interval(500, TimeUnit.MILLISECONDS)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<Long>() {
+                    @Override
+                    public void onSubscribe(@NonNull Disposable d) {
+
+                    }
+
+                    @Override
+                    public void onNext(@NonNull Long aLong) {
+
+                    }
+
+                    @Override
+                    public void onError(@NonNull Throwable e) {
+
+                    }
+
+                    @Override
+                    public void onComplete() {}
+                });
+
+
         for (String c: codes) {
             if (c.equals(code)) {
                 return true;

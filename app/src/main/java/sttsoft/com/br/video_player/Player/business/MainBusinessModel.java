@@ -79,6 +79,7 @@ public class MainBusinessModel {
 
                                 if(response.isSuccessful()) {
 
+                                    //Aguardando a chamada para o server
                                     Scanner scanner = new Scanner(response.body().byteStream());
 
                                     boolean retorno = scanner.nextBoolean();

@@ -8,6 +8,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class RAccess {
 
+    //private static final String baseUrl = "http://192.168.0.10:3000/";
     private static final String baseUrl = "http://192.168.0.50:8080/";
 
     private static OkHttpClient client = new OkHttpClient.Builder().connectTimeout(15, TimeUnit.SECONDS).readTimeout(10, TimeUnit.SECONDS).writeTimeout(5, TimeUnit.SECONDS).build();

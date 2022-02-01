@@ -4,6 +4,7 @@ import android.util.Log;
 
 import org.reactivestreams.Subscription;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.concurrent.Callable;
@@ -19,13 +20,14 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import sttsoft.com.br.video_player.Player.Utils.remote.source.RAccess;
+import sttsoft.com.br.video_player.Player.presentation.data.IOnSuccess;
 import sttsoft.com.br.video_player.Player.repository.PlayerRepository;
 
 public class MainBusinessModel {
-
     private static final String TAG = "MainBusinessModel";
     private static MainBusinessModel instance;
     private ArrayList<String> codes = new ArrayList<>();
+    private Observable<Response<ResponseBody>> response;
 
     public static MainBusinessModel getInstance() {
         if (instance == null) {
@@ -58,63 +60,39 @@ public class MainBusinessModel {
         codes.add("7896045506347");
     }
 
-    public boolean verifyCode() {
-        Observable.interval(500, TimeUnit.MILLISECONDS)
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<Long>() {
-                    @Override
-                    public void onSubscribe(@NonNull Disposable d) {
+    public Observable<Response<ResponseBody>> getResponse() {
+        return response;
+    }
 
+    public void verifyServer(IOnSuccess responseReturn) {
+        final PlayerRepository playerRepository = RAccess.createService(PlayerRepository.class);
+
+        try {
+            Call<ResponseBody> call = playerRepository.getChangeVideo();
+
+            call.enqueue(new Callback<ResponseBody>() {
+                @Override
+                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+
+                    if(response != null && response.isSuccessful()) {
+                        Scanner scanner = new Scanner(response.body().byteStream());
+
+                        int responseValue = scanner.nextInt();
+
+                        Log.i(TAG, "onResponse Trace retorno: " + responseValue);
+
+                        responseReturn.onSuccess(responseValue == 1);
                     }
+                }
 
-                    @Override
-                    public void onNext(@NonNull Long aLong) {
-                        final PlayerRepository playerRepository = RAccess.createService(PlayerRepository.class);
+                @Override
+                public void onFailure(Call<ResponseBody> call, Throwable t) {
 
-                        Call<ResponseBody> call = playerRepository.getChangeVideo();
+                }
+            });
 
-                        call.enqueue(new Callback<ResponseBody>() {
-                            @Override
-                            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-
-                                if(response.isSuccessful()) {
-
-                                    //Aguardando a chamada para o server
-                                    Scanner scanner = new Scanner(response.body().byteStream());
-
-                                    boolean retorno = scanner.nextBoolean();
-
-                                    Log.i(TAG, "onResponse Trace retorno: " + retorno);
-
-                                }
-                            }
-
-                            @Override
-                            public void onFailure(Call<ResponseBody> call, Throwable t) {
-                                Log.i(TAG, "onFailure : " + t.getMessage());
-                            }
-                        });
-
-
-
-                    }
-
-                    @Override
-                    public void onError(@NonNull Throwable e) {
-
-                    }
-
-                    @Override
-                    public void onComplete() {}
-                });
-
-
-
-        for (String c: codes) {
-            if (c.equals(code)) {
-                return true;
-            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        return false;
     }
 }

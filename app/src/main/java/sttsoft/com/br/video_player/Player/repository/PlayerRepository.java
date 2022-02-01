@@ -6,6 +6,6 @@ import retrofit2.http.GET;
 
 public interface PlayerRepository {
 
-    @GET
+    @GET(".")
     Call<ResponseBody> getChangeVideo();
 }

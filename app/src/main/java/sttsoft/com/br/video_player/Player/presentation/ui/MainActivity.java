@@ -7,6 +7,7 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.WindowManager;
@@ -26,6 +27,7 @@ public class MainActivity extends BaseActivity {
     private MainViewModel viewModel;
     private EditText edtBarCode;
     private VideoView videoView;
+    private boolean isCondition = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,8 +42,9 @@ public class MainActivity extends BaseActivity {
         bindComponents();
         setupObservables();
         setupVideo(R.raw.loop);
-        keyboardListener();
-        setupVideo();
+        viewModel.changeVideo();
+        //keyboardListener();
+        //setupVideo();
     }
 
     private void bindComponents() {
@@ -59,13 +62,25 @@ public class MainActivity extends BaseActivity {
 
     private void setupVideo(@RawRes int video) {
         Uri uri = Uri.parse("android.resource://"+getPackageName()+"/"+video);
-        videoView.setVideoURI(uri);
-        videoView.start();
-        if (video == R.raw.loop) {
-            videoView.setOnPreparedListener(mediaPlayer -> mediaPlayer.setLooping(true));
+        if (video == R.raw.condition) {
+            if (isCondition && videoView.isPlaying()) {
+                return;
+            } else {
+                isCondition = true;
+                videoView.setVideoURI(uri);
+                videoView.setOnPreparedListener(mediaPlayer -> {
+                    mediaPlayer.setLooping(false);
+                    videoView.start();
+                });
+                videoView.setOnCompletionListener(mediaPlayer -> setupVideo(R.raw.loop));
+            }
         } else {
-            videoView.setOnPreparedListener(mediaPlayer -> mediaPlayer.setLooping(false));
-            videoView.setOnCompletionListener(mediaPlayer -> setupVideo(R.raw.loop));
+            isCondition = false;
+            videoView.setVideoURI(uri);
+            videoView.setOnPreparedListener(mediaPlayer -> {
+                mediaPlayer.setLooping(true);
+                videoView.start();
+            });
         }
     }
 
@@ -85,7 +100,7 @@ public class MainActivity extends BaseActivity {
     private void setupVideo() {
         edtBarCode.setOnEditorActionListener((textView, actionId, keyEvent) -> {
             if (actionId == EditorInfo.IME_ACTION_UNSPECIFIED) {
-                viewModel.changeVideo(textView.getText().toString());
+                //viewModel.changeVideo(textView.getText().toString());
                 textView.setText("");
                 keyboardListener();
             }
